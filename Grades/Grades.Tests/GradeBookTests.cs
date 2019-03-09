@@ -31,8 +31,7 @@ namespace Grades.Tests
             book.AddGrade(90);
 
             GradeStatistics result = book.ComputeStatistics();
-            Assert.AreEqual(11, result.HighestGrade);
-
+            Assert.AreEqual(10, result.LowestGrade);
         }
 
         [TestMethod]
