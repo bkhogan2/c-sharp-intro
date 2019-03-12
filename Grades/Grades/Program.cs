@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Speech.Synthesis;
+using System.IO;
 
 namespace Grades
 {
@@ -12,34 +13,56 @@ namespace Grades
         static void Main(string[] args)
         {
             GradeBook book = new GradeBook();
+            GetBookName(book);
+            AddGrades(book);
 
-            book.NameChanged += OnNameChanged;
-            book.NameChanged += OnNameChanged2;
+            SaveGrades(book);
 
-            book.Name = "Scott's Grade Book";
-            book.Name = "Grade Book";
-            book.Name = null;
-            book.AddGrade(91);
-            book.AddGrade(89);
-            book.AddGrade(75);
+            WriteResults(book);
+        }
 
+        private static void WriteResults(GradeBook book)
+        {
             GradeStatistics stats = book.ComputeStatistics();
             Console.WriteLine(book.Name);
             WriteResult("Average", stats.AverageGrade);
             WriteResult("Highest", (int)stats.HighestGrade);
             WriteResult("Lowest", stats.LowestGrade);
-
-            Console.ReadKey();
+            WriteResult(stats.Description, stats.LetterGrade);
         }
 
-        static void OnNameChanged(object sender, NameChangedEventArgs args)
+        private static void SaveGrades(GradeBook book)
         {
-            Console.WriteLine($"Gradebook changing name from {args.ExistingName} to {args.NewName}");
+            using (StreamWriter outputFile = File.CreateText("grade.txt"))
+            {
+                book.WriteGrades(outputFile);
+                outputFile.Close();
+            }
         }
 
-        static void WriteResult(string description, int result)
+        private static void AddGrades(GradeBook book)
         {
-            Console.WriteLine(description + ": " + result);
+            book.AddGrade(91);
+            book.AddGrade(89);
+            book.AddGrade(75);
+        }
+
+        private static void GetBookName(GradeBook book)
+        {
+            try
+            {
+                Console.WriteLine("Enter a name");
+                book.Name = Console.ReadLine();
+            }
+            catch (ArgumentException ex)
+            {
+                Console.WriteLine(ex.Message);
+            }
+        }
+
+        static void WriteResult(string description, string result)
+        {
+            Console.WriteLine($"{description}: {result}", description, result);
         }
 
         static void WriteResult(string description, float result)
